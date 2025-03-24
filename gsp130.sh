@@ -51,9 +51,9 @@ subscribe_pattern=(
 print_with_changing_colors "${subscribe_pattern[@]}"
 congrats_pattern=(
 "**********************************************************"
-"**         🎉🎉 CONGRATULATIONS ON SUCCESSFUL EXECUTION 🎉🎉         **"
-"**                 THANK YOU FOR SUPPORTING                **"
-"**                    EDUTECH BARSHA                      **"
+"**   🎉🎉 CONGRATULATIONS ON SUCCESSFUL EXECUTION 🎉🎉 **"
+"**                 THANK YOU FOR SUPPORTING              **"
+"**                    EDUTECH BARSHA                     **"
 "**********************************************************"
 )
 
