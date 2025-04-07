@@ -38,13 +38,7 @@ echo "${RANDOM_BG_COLOR}${RANDOM_TEXT_COLOR}${BOLD}#                            
 echo "${RANDOM_BG_COLOR}${RANDOM_TEXT_COLOR}${BOLD}######################################################################${RESET}"
 echo
 
-# Array of color codes excluding black and white
-TEXT_COLORS=($RED $GREEN $YELLOW $BLUE $MAGENTA $CYAN)
-BG_COLORS=($BG_RED $BG_GREEN $BG_YELLOW $BG_BLUE $BG_MAGENTA $BG_CYAN)
 
-# Pick random colors
-RANDOM_TEXT_COLOR=${TEXT_COLORS[$RANDOM % ${#TEXT_COLORS[@]}]}
-RANDOM_BG_COLOR=${BG_COLORS[$RANDOM % ${#BG_COLORS[@]}]}
 
 #----------------------------------------------------start--------------------------------------------------#
 
