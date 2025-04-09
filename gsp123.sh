@@ -1,28 +1,18 @@
-clear
-
 #!/bin/bash
-# Define color variables
 
-BLACK=`tput setaf 0`
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-BLUE=`tput setaf 4`
-MAGENTA=`tput setaf 5`
-CYAN=`tput setaf 6`
-WHITE=`tput setaf 7`
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
 
-BG_BLACK=`tput setab 0`
-BG_RED=`tput setab 1`
-BG_GREEN=`tput setab 2`
-BG_YELLOW=`tput setab 3`
-BG_BLUE=`tput setab 4`
-BG_MAGENTA=`tput setab 5`
-BG_CYAN=`tput setab 6`
-BG_WHITE=`tput setab 7`
-
-BOLD=`tput bold`
-RESET=`tput sgr0`
+NO_COLOR=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
 
 # Array of color codes excluding black and white
 TEXT_COLORS=($RED $GREEN $YELLOW $BLUE $MAGENTA $CYAN)
@@ -40,150 +30,102 @@ echo "${RANDOM_BG_COLOR}${RANDOM_TEXT_COLOR}${BOLD}#                            
 echo "${RANDOM_BG_COLOR}${RANDOM_TEXT_COLOR}${BOLD}######################################################################${RESET}"
 echo
 
-#----------------------------------------------------start--------------------------------------------------#
+clear
 
-echo "${RANDOM_BG_COLOR}${RANDOM_TEXT_COLOR}${BOLD}Starting Execution${RESET}"
-
-# Step 1: Get the project ID
-echo "${GREEN}${BOLD}Fetching PROJECT_ID${RESET}"
-export PROJECT_ID=$(gcloud config get-value project)
-
-# Step 2: Get the project number
-echo "${YELLOW}${BOLD}Fetching PROJECT_NUMBER${RESET}"
-export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} \
-    --format="value(projectNumber)")
-
-# Step 3: Get the default zone
-echo "${BLUE}${BOLD}Fetching ZONE${RESET}"
-export ZONE=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-
-# Step 4: Get the default region
-echo "${MAGENTA}${BOLD}Fetching REGION${RESET}"
-export REGION=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items[google-compute-default-region])")
-
-# Step 5: Assign storage admin role
-echo "${CYAN}${BOLD}Assigning Storage Admin Role${RESET}"
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
-    --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
-    --role=roles/storage.admin
-
-# Step 6: Create Dataproc cluster
-echo "${RED}${BOLD}Creating Dataproc Cluster${RESET}"
-gcloud dataproc clusters create qlab \
-    --enable-component-gateway \
-    --region $REGION \
-    --zone $ZONE \
-    --master-machine-type e2-standard-4 \
-    --master-boot-disk-type pd-balanced \
-    --master-boot-disk-size 100 \
-    --num-workers 2 \
-    --worker-machine-type e2-standard-2 \
-    --worker-boot-disk-size 100 \
-    --image-version 2.2-debian12 \
-    --project $DEVSHELL_PROJECT_ID
-
-# Step 7: Submit Spark job
-echo "${GREEN}${BOLD}Submitting Spark Job${RESET}"
-gcloud dataproc jobs submit spark \
-    --cluster qlab \
-    --region $REGION \
-    --class org.apache.spark.examples.SparkPi \
-    --jars file:///usr/lib/spark/examples/jars/spark-examples.jar \
-    -- 1000
-
+echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-# Function to display a random congratulatory message
-function random_congrats() {
-    MESSAGES=(
-        "${GREEN}Congratulations For Completing The Lab! Keep up the great work!${RESET}"
-        "${CYAN}Well done! Your hard work and effort have paid off!${RESET}"
-        "${YELLOW}Amazing job! You’ve successfully completed the lab!${RESET}"
-        "${BLUE}Outstanding! Your dedication has brought you success!${RESET}"
-        "${MAGENTA}Great work! You’re one step closer to mastering this!${RESET}"
-        "${RED}Fantastic effort! You’ve earned this achievement!${RESET}"
-        "${CYAN}Congratulations! Your persistence has paid off brilliantly!${RESET}"
-        "${GREEN}Bravo! You’ve completed the lab with flying colors!${RESET}"
-        "${YELLOW}Excellent job! Your commitment is inspiring!${RESET}"
-        "${BLUE}You did it! Keep striving for more successes like this!${RESET}"
-        "${MAGENTA}Kudos! Your hard work has turned into a great accomplishment!${RESET}"
-        "${RED}You’ve smashed it! Completing this lab shows your dedication!${RESET}"
-        "${CYAN}Impressive work! You’re making great strides!${RESET}"
-        "${GREEN}Well done! This is a big step towards mastering the topic!${RESET}"
-        "${YELLOW}You nailed it! Every step you took led you to success!${RESET}"
-        "${BLUE}Exceptional work! Keep this momentum going!${RESET}"
-        "${MAGENTA}Fantastic! You’ve achieved something great today!${RESET}"
-        "${RED}Incredible job! Your determination is truly inspiring!${RESET}"
-        "${CYAN}Well deserved! Your effort has truly paid off!${RESET}"
-        "${GREEN}You’ve got this! Every step was a success!${RESET}"
-        "${YELLOW}Nice work! Your focus and effort are shining through!${RESET}"
-        "${BLUE}Superb performance! You’re truly making progress!${RESET}"
-        "${MAGENTA}Top-notch! Your skill and dedication are paying off!${RESET}"
-        "${RED}Mission accomplished! This success is a reflection of your hard work!${RESET}"
-        "${CYAN}You crushed it! Keep pushing towards your goals!${RESET}"
-        "${GREEN}You did a great job! Stay motivated and keep learning!${RESET}"
-        "${YELLOW}Well executed! You’ve made excellent progress today!${RESET}"
-        "${BLUE}Remarkable! You’re on your way to becoming an expert!${RESET}"
-        "${MAGENTA}Keep it up! Your persistence is showing impressive results!${RESET}"
-        "${RED}This is just the beginning! Your hard work will take you far!${RESET}"
-        "${CYAN}Terrific work! Your efforts are paying off in a big way!${RESET}"
-        "${GREEN}You’ve made it! This achievement is a testament to your effort!${RESET}"
-        "${YELLOW}Excellent execution! You’re well on your way to mastering the subject!${RESET}"
-        "${BLUE}Wonderful job! Your hard work has definitely paid off!${RESET}"
-        "${MAGENTA}You’re amazing! Keep up the awesome work!${RESET}"
-        "${RED}What an achievement! Your perseverance is truly admirable!${RESET}"
-        "${CYAN}Incredible effort! This is a huge milestone for you!${RESET}"
-        "${GREEN}Awesome! You’ve done something incredible today!${RESET}"
-        "${YELLOW}Great job! Keep up the excellent work and aim higher!${RESET}"
-        "${BLUE}You’ve succeeded! Your dedication is your superpower!${RESET}"
-        "${MAGENTA}Congratulations! Your hard work has brought great results!${RESET}"
-        "${RED}Fantastic work! You’ve taken a huge leap forward today!${RESET}"
-        "${CYAN}You’re on fire! Keep up the great work!${RESET}"
-        "${GREEN}Well deserved! Your efforts have led to success!${RESET}"
-        "${YELLOW}Incredible! You’ve achieved something special!${RESET}"
-        "${BLUE}Outstanding performance! You’re truly excelling!${RESET}"
-        "${MAGENTA}Terrific achievement! Keep building on this success!${RESET}"
-        "${RED}Bravo! You’ve completed the lab with excellence!${RESET}"
-        "${CYAN}Superb job! You’ve shown remarkable focus and effort!${RESET}"
-        "${GREEN}Amazing work! You’re making impressive progress!${RESET}"
-        "${YELLOW}You nailed it again! Your consistency is paying off!${RESET}"
-        "${BLUE}Incredible dedication! Keep pushing forward!${RESET}"
-        "${MAGENTA}Excellent work! Your success today is well earned!${RESET}"
-        "${RED}You’ve made it! This is a well-deserved victory!${RESET}"
-        "${CYAN}Wonderful job! Your passion and hard work are shining through!${RESET}"
-        "${GREEN}You’ve done it! Keep up the hard work and success will follow!${RESET}"
-        "${YELLOW}Great execution! You’re truly mastering this!${RESET}"
-        "${BLUE}Impressive! This is just the beginning of your journey!${RESET}"
-        "${MAGENTA}You’ve achieved something great today! Keep it up!${RESET}"
-        "${RED}You’ve made remarkable progress! This is just the start!${RESET}"
-    )
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Please enter the cluster name:${RESET_FORMAT}"
+read -p "Cluster Name: " CLUSTER_NAME
+export CLUSTER_NAME
 
-    RANDOM_INDEX=$((RANDOM % ${#MESSAGES[@]}))
-    echo -e "${BOLD}${MESSAGES[$RANDOM_INDEX]}"
+echo -e "${MAGENTA_TEXT}${BOLD_TEXT}Authenticating your GCP account...${RESET_FORMAT}"
+gcloud auth list
+
+echo -e "${MAGENTA_TEXT}${BOLD_TEXT}Fetching default zone and region from project metadata...${RESET_FORMAT}"
+export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+
+export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
+
+echo -e "${MAGENTA_TEXT}${BOLD_TEXT}Fetching project number...${RESET_FORMAT}"
+PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format="value(projectNumber)")
+
+echo -e "${MAGENTA_TEXT}${BOLD_TEXT}Adding IAM policy binding for storage admin role...${RESET_FORMAT}"
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+  --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+  --role="roles/storage.admin"
+
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Waiting for 60 seconds to ensure IAM policy changes propagate...${RESET_FORMAT}"
+sleep 60
+
+#!/bin/bash
+
+echo -e "${CYAN_TEXT}${BOLD_TEXT}Cluster Name:${RESET_FORMAT} $CLUSTER_NAME"
+echo -e "${CYAN_TEXT}${BOLD_TEXT}Zone:${RESET_FORMAT} $ZONE"
+echo -e "${CYAN_TEXT}${BOLD_TEXT}Region:${RESET_FORMAT} $REGION"
+
+echo -e "${MAGENTA_TEXT}${BOLD_TEXT}Creating Dataproc cluster...${RESET_FORMAT}"
+echo -e "${CYAN_TEXT}This may take a few minutes. Please wait.${RESET_FORMAT}"
+
+cluster_function() {
+  gcloud dataproc clusters create "$CLUSTER_NAME" \
+  --region "$REGION" \
+  --zone "$ZONE" \
+  --master-machine-type n1-standard-2 \
+  --worker-machine-type n1-standard-2 \
+  --num-workers 2 \
+  --worker-boot-disk-size 100 \
+  --worker-boot-disk-type pd-standard \
+  --no-address
 }
 
-# Display a random congratulatory message
-random_congrats
+cp_success=false
 
-echo -e "\n"  # Adding one blank line
+while [ "$cp_success" = false ]; do
+  cluster_function
+  exit_status=$?
 
-cd
+  if [ "$exit_status" -eq 0 ]; then
+  echo -e "${GREEN_TEXT}${BOLD_TEXT}Cluster created successfully!${RESET_FORMAT}"
+  cp_success=true
+  else
+  echo -e "${RED_TEXT}${BOLD_TEXT}Cluster creation failed!${RESET_FORMAT}"
 
-remove_files() {
-    # Loop through all files in the current directory
-    for file in *; do
-        # Check if the file name starts with "gsp", "arc", or "shell"
-        if [[ "$file" == gsp* || "$file" == arc* || "$file" == shell* ]]; then
-            # Check if it's a regular file (not a directory)
-            if [[ -f "$file" ]]; then
-                # Remove the file and echo the file name
-                rm "$file"
-                echo "File removed: $file"
-            fi
-        fi
-    done
-}
+  if gcloud dataproc clusters describe "$CLUSTER_NAME" --region "$REGION" &>/dev/null; then
+    echo -e "${YELLOW_TEXT}${BOLD_TEXT}Cluster already exists. Deleting it...${RESET_FORMAT}"
+    gcloud dataproc clusters delete "$CLUSTER_NAME" --region "$REGION" --quiet
+    echo -e "${CYAN_TEXT}Cluster deleted. Retrying in 10 seconds...${RESET_FORMAT}"
+  else
+    echo -e "${RED_TEXT}${BOLD_TEXT}Cluster does not exist. Retrying in 10 seconds...${RESET_FORMAT}"
+  fi
+  sleep 10
+  fi
+done
 
-remove_files
+echo -e "${MAGENTA_TEXT}${BOLD_TEXT}Submitting Spark job to the cluster...${RESET_FORMAT}"
+gcloud dataproc jobs submit spark \
+  --project $DEVSHELL_PROJECT_ID \
+  --region $REGION \
+  --cluster $CLUSTER_NAME \
+  --class org.apache.spark.examples.SparkPi \
+  --jars file:///usr/lib/spark/examples/jars/spark-examples.jar \
+  -- 1000
+
+# Pick another random color for the final message
+FINAL_TEXT_COLOR=${TEXT_COLORS[$RANDOM % ${#TEXT_COLORS[@]}]}
+FINAL_BG_COLOR=${BG_COLORS[$RANDOM % ${#BG_COLORS[@]}]}
+
+# Display Congratulations Message
+echo "${FINAL_BG_COLOR}${FINAL_TEXT_COLOR}${BOLD}######################################################################${RESET}"
+echo "${FINAL_BG_COLOR}${FINAL_TEXT_COLOR}${BOLD}#                                                                    #${RESET}"
+echo "${FINAL_BG_COLOR}${FINAL_TEXT_COLOR}${BOLD}#       🎉🎉 CONGRATULATIONS FOR COMPLETING THE LAB! 🎉🎉        #${RESET}"
+echo "${FINAL_BG_COLOR}${FINAL_TEXT_COLOR}${BOLD}#                                                                    #${RESET}"
+echo "${FINAL_BG_COLOR}${FINAL_TEXT_COLOR}${BOLD}######################################################################${RESET}"
+
+# Subscribe message with random colors
+SUBSCRIBE_TEXT_COLOR=${TEXT_COLORS[$RANDOM % ${#TEXT_COLORS[@]}]}
+SUBSCRIBE_BG_COLOR=${BG_COLORS[$RANDOM % ${#BG_COLORS[@]}]}
+
+echo "${SUBSCRIBE_BG_COLOR}${SUBSCRIBE_TEXT_COLOR}${BOLD}📢 SUBSCRIBE TO OUR CHANNEL: https://www.youtube.com/@edutechbarsha ${RESET}"
